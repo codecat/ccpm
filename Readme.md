@@ -17,4 +17,4 @@ ccpm_workspace 'test'
 ccpm_report()
 ```
 
-Note that `ccpm_pkg()` currently only works on Linux. There is no Windows support yet. It also only handles `-L`, `-l`, and `-I` flags for now.
+Note that `ccpm_pkg()` currently only works on Linux. There is no Windows support yet. It currently also only handles `-L`, `-l`, `-I`, and `-D` flags.
