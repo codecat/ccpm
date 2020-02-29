@@ -1,5 +1,3 @@
-CCPM_GLOBAL_WORKSPACES = {}
-
 function ccpm_workspace(name)
 	table.insert(CCPM_GLOBAL_WORKSPACES, workspace(name))
 		targetdir('bin/')

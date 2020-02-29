@@ -3,24 +3,30 @@ function ccpm_report()
 	print('===== CCPM build =====')
 	print('%')
 
-	print('%       Host: ' .. os.host())
-	print('%     Target: ' .. os.target())
+	print('%  Host: ' .. os.host())
+	print('%  Target: ' .. os.target())
 	print('%')
 
-	print('%     Output: bin/')
-	print('%      Build: projects/' .. _ACTION .. '/')
+	print('%  Output: bin/')
+	print('%  Build: projects/' .. _ACTION .. '/')
 	print('%')
 
 	if ccpm_option_on('x86') then
-		print('%     Option: x86')
+		print('%  Option: x86')
 	end
 
 	if ccpm_option_on('x64') then
-		print('%     Option: x64')
+		print('%  Option: x64')
 	end
 
 	if os.target() == 'windows' and os.host() ~= 'windows' then
-		print('%     Option: mingw')
+		print('%  Option: mingw')
+	end
+
+	print('%')
+
+	for _, pkg in ipairs(CCPM_GLOBAL_PACKAGES) do
+		print('%  Package "' .. pkg.id .. '"')
 	end
 
 	print('%')
