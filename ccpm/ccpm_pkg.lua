@@ -36,19 +36,19 @@ local function _pkg_open(name)
 	local variables = {}
 	local properties = {}
 
-	local reading_variables = true
-
 	for line in io.lines(filepath) do
-		if reading_variables then
-			k, v = line:match('([^=]+)=(.*)')
-			if k == nil then
-				reading_variables = false
+		if line:len() > 0 and line:sub(1, 1) ~= '#' then
+			k, v = line:match('^([A-Z][^:]+): (.*)$')
+			if k ~= nil and v ~= nil then
+				properties[k] = _pkg_str_replace(v, variables)
 			else
-				variables[k] = _pkg_str_replace(v, variables)
+				k, v = line:match('^([^=]+)=(.*)$')
+				if k == nil or v == nil then
+					reading_variables = false
+				else
+					variables[k] = _pkg_str_replace(v, variables)
+				end
 			end
-		else
-			k, v = line:match('([^:]+): (.*)')
-			properties[k] = _pkg_str_replace(v, variables)
 		end
 	end
 
@@ -61,12 +61,14 @@ local function _pkg_open(name)
 		libs = {},
 		libdirs = {},
 		includedirs = {},
+		defines = {},
 
 		requires = {},
 	}
 
 	table.insert(CCPM_GLOBAL_PACKAGES, pkg)
 
+	--TODO: Libs.private (for static configurations)
 	-- Handle linker flags (-L and -l)
 	local libs = properties['Libs']
 	if libs ~= nil then
@@ -83,7 +85,7 @@ local function _pkg_open(name)
 		end
 	end
 
-	-- Handle compiler flags (-I)
+	-- Handle compiler flags (-I and -D)
 	local cflags = properties['Cflags']
 	if cflags ~= nil then
 		for flag in cflags:gmatch('-[^ ]+') do
@@ -91,9 +93,15 @@ local function _pkg_open(name)
 			if flag_include ~= nil and flag_include ~= '/usr/include' and flag_include ~= '/usr/local/include' then
 				table.insert(pkg.includedirs, flag_include)
 			end
+
+			flag_define = flag:match('^-D(.*)$')
+			if flag_define ~= nil then
+				table.insert(pkg.defines, flag_define)
+			end
 		end
 	end
 
+	--TODO: Requires.private (for static configurations)
 	-- Load any dependencies
 	local requires = properties['Requires']
 	if requires ~= nil then
@@ -122,6 +130,10 @@ local function _pkg_add(pkg, added)
 
 	for _, dir in ipairs(pkg.includedirs) do
 		includedirs(dir)
+	end
+
+	for _, define in ipairs(pkg.defines) do
+		defines(define)
 	end
 
 	for _, dep in ipairs(pkg.requires) do
